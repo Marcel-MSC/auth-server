@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs'
 import cors from 'cors'
 import jwt from "jsonwebtoken"
 import { JSONFilePreset } from 'lowdb/node'
+import 'dotenv/config'
+
 const defaultData = { users: [] }
 let db
 async function startLowdb () {
@@ -13,7 +15,7 @@ startLowdb()
 // Initialize Express app
 const app = express()
 // Define a JWT secret key. This should be isolated by using env letiables for security
-const jwtSecretKey = "dsfdsfsdfdsvcsvdfgefg"
+const jwtSecretKey = process.env.JWT_SECRET_KEY
 
 // Set up CORS and JSON middlewares
 app.use(cors())
@@ -22,7 +24,7 @@ app.use(express.urlencoded({ extended: true }))
 
 // Basic home route for the API
 app.get("/", (_req, res) => {
-    res.send("Auth API.\nPlease use POST /auth & POST /verify for authentication")
+    res.send("Auth API.\nPlease use POST /auth & POST /verify for authentication");
 })
 
 // The auth endpoint that creates a new user record or logs a user based on an existing record
@@ -47,7 +49,7 @@ app.post("/auth", (req, res) => {
                     signInTime: Date.now(),
                 }
                 const token = jwt.sign(loginData, jwtSecretKey)
-                res.status(200).json({ message: "success", token })
+                res.status(200).json({ message: "authentication success", token })
             }
         })
         // If no user is found, hash the given password and create a new entry in the auth db with the email and hashed password
@@ -71,18 +73,13 @@ app.post("/auth", (req, res) => {
 
 // The verify endpoint that checks if a given JWT token is valid
 app.post('/verify', (req, res) => {
-    const tokenHeaderKey = "jwt-token"
-    const authToken = req.headers[tokenHeaderKey]
+    //const tokenHeaderKey = "jwt-token"
+    const authToken = req.headers.tokenheaderkey;
+    console.log('req', req.headers)
+    debugger
     try {
       const verified = jwt.verify(authToken, jwtSecretKey)
-      if (verified) {
-        return res
-          .status(200)
-          .json({ status: "logged in", message: "success" })
-      } else {
-        // Access Denied
-        return res.status(401).json({ status: "invalid auth", message: "error" })
-      }
+      return verified ? res.status(200).json({ status: "logged in", message: "verify with success" }) : res.status(401).json({ status: "invalid auth", message: "error" });
     } catch (error) {
       // Access Denied
       return res.status(401).json({ status: "invalid auth", message: "error" })
@@ -90,7 +87,6 @@ app.post('/verify', (req, res) => {
 })
 
 // An endpoint to see if there's an existing account for a given email address
-
 app.post('/check-account', (req, res) => {
     const { email } = req.body
     console.log(req.body)
