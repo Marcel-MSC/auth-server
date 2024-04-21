@@ -7,7 +7,7 @@ import 'dotenv/config'
 
 const defaultData = { users: [] }
 let db
-async function startLowdb () {
+async function startLowdb() {
     db = await JSONFilePreset('datatable.json', defaultData)
 }
 startLowdb()
@@ -78,11 +78,11 @@ app.post('/verify', (req, res) => {
     console.log('req', req.headers)
     debugger
     try {
-      const verified = jwt.verify(authToken, jwtSecretKey)
-      return verified ? res.status(200).json({ status: "logged in", message: "verify with success" }) : res.status(401).json({ status: "invalid auth", message: "error" });
+        const verified = jwt.verify(authToken, jwtSecretKey)
+        return verified ? res.status(200).json({ status: "logged in", message: "verify with success" }) : res.status(401).json({ status: "invalid auth", message: "error" });
     } catch (error) {
-      // Access Denied
-      return res.status(401).json({ status: "invalid auth", message: "error" })
+        // Access Denied
+        return res.status(401).json({ status: "invalid auth", message: "error" })
     }
 })
 
@@ -98,6 +98,26 @@ app.post('/check-account', (req, res) => {
     })
 })
 
-app.listen(3080, function (){
+// An endpoint to delete a user
+// lowdb doenst give a delete/remove function
+// so we filer the user to se if exists and them update the users with a new object;
+app.post('/remove-user', async (req, res) => {
+    const { email } = req.body
+    const { users } = db.data;
+    const user = users.filter(user => email === user.email);
+    if (user) {
+        const newObj = {};
+        newObj.users = [];
+        const newUsers = users.filter(userDB => email == userDB.email ? null : userDB);
+        newObj.users = newUsers;
+        db.data.users = newUsers;
+        db.write();
+    }
+    res.status(200).json({
+        status: user.length === 1 ? "User removed" : "User not founded", userExists: user.length === 1
+    });
+})
+
+app.listen(3080, function () {
     console.log('listen to port 3080')
 })
