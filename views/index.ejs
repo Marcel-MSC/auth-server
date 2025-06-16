@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Auth API - Documentação</title>
+</head>
+<body>
+  <h1>Bem-vindo à Auth API</h1>
+  <p>Use os endpoints:</p>
+  <ul>
+    <li>
+      <strong>POST /create-user</strong> - Criar usuário<br>
+      <em>Body (JSON):</em>
+      <pre>{
+  "email": "usuario@exemplo.com",
+  "password": "suaSenha"
+}</pre>
+    </li>
+    <li>
+      <strong>POST /auth</strong> - Autenticar usuário<br>
+      <em>Body (JSON):</em>
+      <pre>{
+  "email": "usuario@exemplo.com",
+  "password": "suaSenha"
+}</pre>
+    </li>
+    <li>
+      <strong>POST /verify</strong> - Verificar token<br>
+      <em>Header:</em>
+      <pre>tokenheaderkey: &lt;seu_token_jwt&gt;</pre>
+    </li>
+    <li>
+      <strong>GET /check-account?email=usuario@exemplo.com</strong> - Checar existência de usuário<br>
+      <em>Query:</em>
+      <pre>?email=usuario@exemplo.com</pre>
+    </li>
+    <li>
+      <strong>DELETE /remove-user/:email</strong> - Remover usuário<br>
+      <em>Parâmetro de rota:</em>
+      <pre>/remove-user/usuario@exemplo.com</pre>
+    </li>
+  </ul>
+  <footer>
+    <p>Versão: <%= version %></p>
+  </footer>
+</body>
+</html>
