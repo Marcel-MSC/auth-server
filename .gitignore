@@ -1,5 +1,8 @@
-#variables
+# variables
 .env
+
+# data
+datatable.json
 
 # dependencies
 /node_modules

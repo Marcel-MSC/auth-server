@@ -15,6 +15,11 @@ await startLowdb()
 const app = express()
 const jwtSecretKey = process.env.JWT_SECRET_KEY
 
+if (!jwtSecretKey || !jwtSecretKey.trim()) {
+    console.error('FATAL: JWT_SECRET_KEY must be set in .env')
+    process.exit(1)
+}
+
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -61,7 +66,7 @@ app.post("/auth", async (req, res) => {
                 email,
                 signInTime: Date.now(),
             }
-            const token = jwt.sign(loginData, jwtSecretKey)
+            const token = jwt.sign(loginData, jwtSecretKey, { expiresIn: '7d' })
             return res.status(200).json({ message: "authentication success", token })
         }
     } else {
@@ -71,7 +76,11 @@ app.post("/auth", async (req, res) => {
 })
 
 app.post('/verify', (req, res) => {
-    const authToken = req.headers.tokenheaderkey;
+    const authHeader = req.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ status: "invalid auth", message: "Missing or invalid Authorization header. Use: Authorization: Bearer <token>" })
+    }
+    const authToken = authHeader.slice(7)
     try {
         const verified = jwt.verify(authToken, jwtSecretKey)
         return verified ? res.status(200).json({ status: "logged in", message: "verify with success" }) : res.status(401).json({ status: "invalid auth", message: "error" });
@@ -81,7 +90,10 @@ app.post('/verify', (req, res) => {
 })
 
 app.get('/check-account', (req, res) => {
-    const { email } = req.body
+    const { email } = req.query
+    if (!email || !email.trim()) {
+        return res.status(400).json({ error: 'Email is required as query param (?email=...)' })
+    }
     const { users } = db.data
     const user = users.find(user => email === user.email)
     res.status(200).json({
@@ -105,6 +117,7 @@ app.delete('/remove-user', async (req, res) => {
     });
 })
 
-app.listen(3080, function () {
-    console.log('listen to port 3080')
+const port = process.env.PORT || 3080
+app.listen(port, function () {
+    console.log('Listening on port', port)
 })
