@@ -32,24 +32,24 @@ app.get("/", (_req, res) => {
     // res.send("Auth API.\nPlease use POST /auth & POST /verify for authentication");
 });
 
-// Rota para criar usuário
+// Create user route
 app.post('/create-user', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+        return res.status(400).json({ error: 'Email and password are required.' });
     }
 
     const { users } = db.data;
     if (users.find(u => u.email === email)) {
-        return res.status(409).json({ error: 'Usuário já existe.' });
+        return res.status(409).json({ error: 'User already exists.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     db.data.users.push({ email, password: hashedPassword });
     await db.write();
 
-    res.status(201).json({ message: 'Usuário criado com sucesso!' });
+    res.status(201).json({ message: 'User created successfully!' });
 });
 
 app.post("/auth", async (req, res) => {
@@ -70,8 +70,8 @@ app.post("/auth", async (req, res) => {
             return res.status(200).json({ message: "authentication success", token })
         }
     } else {
-        // Usuário não encontrado
-        return res.status(404).json({ message: "Usuário não encontrado" })
+        // User not found
+        return res.status(404).json({ message: "User not found" })
     }
 })
 
@@ -113,7 +113,7 @@ app.delete('/remove-user', async (req, res) => {
         });
     }
     res.status(200).json({
-        status: "User not founded", userExists: false
+        status: "User not found", userExists: false
     });
 })
 
